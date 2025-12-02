@@ -76,5 +76,22 @@ exports.logout = async (req, res) => {
 }
 
 exports.auth = async (req, res) => {
+    try{
+        const cookie = req.cookies['jwt']
+        const claims = jwt.verify(cookie, 'secret')
 
+        if(!claims){
+                return res.status(401).send({
+                message: 'unauthenticated'
+            })
+        }
+        const user = await  User.findOne({where:{id: claims.id}})
+        const {password, ...data} = await user.toJSON()
+        res.send(data)
+    }
+    catch (e){
+        return res.status(401).send({
+            message: 'unauthenticated'
+        })
+    }
 }
